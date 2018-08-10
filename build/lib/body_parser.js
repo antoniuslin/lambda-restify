@@ -1,0 +1,29 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const qs = require("querystring");
+const restify_errors_1 = require("restify-errors");
+function default_1(req, res, next) {
+    req.rawBody = req.body;
+    if (!req.body) {
+        return next();
+    }
+    const contentType = req.header('content-type');
+    if (!contentType) {
+        return next();
+    }
+    switch (contentType) {
+        case 'application/x-www-form-urlencoded':
+            req.body = qs.parse(req.rawBody);
+            break;
+        case 'application/json':
+            try {
+                req.body = JSON.parse(req.rawBody);
+            }
+            catch (e) {
+                return next(new restify_errors_1.InvalidContentError('Invalid JSON: ' + e.message));
+            }
+            break;
+    }
+    next();
+}
+exports.default = default_1;
